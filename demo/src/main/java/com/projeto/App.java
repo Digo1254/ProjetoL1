@@ -30,48 +30,52 @@ public class App
 {
     public static void main( String[] args )
     {
-
+        // Busca Pedido(Utilizado muito provavelmente pelo caixa)
         String codigo = String.valueOf(leituraQrCode());
+
+        
 
         Connection conexao = ConexaoBanco.conectar();
 
         PedidoDAO pedidoDAO = new PedidoDAO();
 
-        List<Pedido> pedidosBusca = pedidoDAO.busca(conexao, codigo);
+        int idComanda = pedidoDAO.buscaCodigoQR(codigo, conexao);
 
-        if(pedidosBusca.isEmpty()){
-            System.out.println("Está vazio");
-        }
-        else{
-            for(Pedido pedido : pedidosBusca){
-            Set<Item> set = pedido.getMapa().keySet();
-            for(Item item : set){
-                System.out.println("Produto: " + item.getNome() + " Quantidade: " + pedido.getMapa().get(item));
-            }
-            }
-        }
+        // List<Pedido> pedidosBusca = pedidoDAO.busca(conexao, codigo);
+
+        // if(pedidosBusca.isEmpty()){
+        //     System.out.println("Está vazio");
+        // }
+        // else{
+        //     for(Pedido pedido : pedidosBusca){
+        //     Set<Item> set = pedido.getMapa().keySet();
+        //     for(Item item : set){
+        //         System.out.println("Produto: " + item.getNome() + " Quantidade: " + pedido.getMapa().get(item));
+        //     }
+        //     }
+        // }
+        
+        // Inserir pedido no banco de dados
+        Pedido pedido = new Pedido();
+
+        pedido.setIdComanda(idComanda);
+        pedido.setStatus(Status.PREPARANDO);
+        pedido.setValorTotal(192.4);
+
+        Map<Item,Integer> mapa = pedido.getMapa();
+
+        Item item = new Item();
+
+        item.setId(1);
+
+        mapa.put(item,4);
+
+        pedido.setMapa(mapa);
+
+        pedidoDAO.inserir(pedido, conexao);
         
 
-        // Pedido pedido = new Pedido();
-
-        // pedido.setIdComanda(1);
-        // pedido.setStatus(Status.PREPARANDO);
-        // pedido.setValorTotal(192.4);
-
-        // Map<Item,Integer> mapa = pedido.getMapa();
-
-        // Item item = new Item();
-
-        // item.setId(1);
-
-        // pedido.setId(4);
-
-        // mapa.put(item,2);
-
-        // pedido.setMapa(mapa);
-
-        // pedidoDAO.inserir(pedido, conexao);
-        
+        // ------------------------------------------------------
         // System.out.println("Tentando conectar ao MySQL...");
         
         // Connection conexao = ConexaoBanco.conectar();

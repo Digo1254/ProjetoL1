@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,50 +19,93 @@ import com.projeto.model.Pedido.Status;
 
 public class PedidoDAO {
 
-    public void inserir(Pedido pedido,Connection conexao){
+    public void inserir(Pedido pedido, Connection conexao) {
 
-        String sqlInsertPedidos = "INSERT INTO pedidos (valorTotal,status,fk_comanda) VALUES (?,?,?)";
+    String sqlInsertPedidos = "INSERT INTO pedidos (valorTotal, status, fk_comanda) VALUES (?, ?, ?)";
+    String sqlInsertItens = "INSERT INTO itens_do_pedido (pedido_id, item_id, quantidade) VALUES (?, ?, ?)";
 
-        String sqlInsertItens = "INSERT INTO itens_do_pedido (pedido_id,item_id,quantidade) VALUES (?,?,?)";
+    // Criamos os dois statements juntos para gerenciar a mesma transação
+    try (PreparedStatement stm = conexao.prepareStatement(sqlInsertPedidos, Statement.RETURN_GENERATED_KEYS);
+         PreparedStatement stm2 = conexao.prepareStatement(sqlInsertItens)) {
 
-        try(PreparedStatement stm = conexao.prepareStatement(sqlInsertPedidos);){
+        
+        conexao.setAutoCommit(false);
 
-            stm.setDouble(1,pedido.getValorTotal());
-            stm.setString(2,pedido.getStatus().name());
-            stm.setInt(3, pedido.getIdComanda());
-            stm.execute();
-        }catch(Exception e){
-            e.printStackTrace();
+        
+        stm.setDouble(1, pedido.getValorTotal());
+        stm.setString(2, pedido.getStatus().name());
+        stm.setInt(3, pedido.getIdComanda());
+        stm.executeUpdate(); 
 
-            try{
-                conexao.rollback();
-            }catch(SQLException e1){
-                e1.printStackTrace();
-            }
-        }
-
-        try(PreparedStatement stm2 = conexao.prepareStatement(sqlInsertItens);){
-
-            for(Item item : pedido.getMapa().keySet()){
+        
+        int idPedidoGerado = 0;
+        try (ResultSet generatedKeys = stm.getGeneratedKeys()) {
+            if (generatedKeys.next()) {
+                idPedidoGerado = generatedKeys.getInt(1);
                 
-                stm2.setInt(1,pedido.getId());
-                stm2.setInt(2, item.getId());
-                stm2.setInt(3,pedido.getMapa().get(item));
-
-                stm2.execute();
-
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-
-            try{
-                conexao.rollback();
-            }catch(SQLException e1){
-                e1.printStackTrace();
+                pedido.setId(idPedidoGerado); 
+            } else {
+                throw new SQLException("Falha ao obter o ID do pedido criado.");
             }
         }
 
+        
+        for (Item item : pedido.getMapa().keySet()) {
+            stm2.setInt(1, idPedidoGerado); 
+            stm2.setInt(2, item.getId());
+            stm2.setInt(3, pedido.getMapa().get(item));
+            
+            
+            stm2.addBatch(); 
+        }
+        stm2.executeBatch(); 
 
+       
+        conexao.commit();
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        
+        
+        try {
+            if (conexao != null) {
+                conexao.rollback();
+            }
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }
+    } finally {
+        
+        try {
+            conexao.setAutoCommit(true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+    public int buscaCodigoQR(String codigo,Connection conexao){
+        String sqlBuscaCodigo = "SELECT idcomandas FROM comandas WHERE codigo = ?";
+
+        try(PreparedStatement stm = conexao.prepareStatement(sqlBuscaCodigo);){
+            stm.setString(1, codigo);
+            
+            try(ResultSet rs = stm.executeQuery()){
+                if(rs.next()){
+                    return rs.getInt("idcomandas");
+                }
+                
+
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return 0;
     }
 
     public List<Pedido> busca(Connection conexao,String qrCodigo){
