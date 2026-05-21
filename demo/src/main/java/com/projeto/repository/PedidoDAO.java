@@ -1,5 +1,7 @@
 package com.projeto.repository;
 
+import java.awt.Image;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,6 +15,10 @@ import java.util.Map;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+
+import com.projeto.config.ConexaoBanco;
 import com.projeto.model.Item;
 import com.projeto.model.Pedido;
 import com.projeto.model.Pedido.Status;
@@ -173,5 +179,38 @@ public class PedidoDAO {
         }
 
     }
+
+// Exemplo puxa imagem banco de dados
+
+    public ImageIcon buscarImagemDoBanco(int idProduto,Connection conexao) {
+        String sql = "SELECT foto FROM produtos WHERE id = ?";
+    
+        // ConexaoBanco é a classe que você já tem no seu projeto (visto na imagem anterior)
+        try (PreparedStatement stmt = conexao.prepareStatement(sql)) {
+        
+            stmt.setInt(1, idProduto);
+            ResultSet rs = stmt.executeQuery();
+        
+            if (rs.next()) {
+                // 1. Pega os bytes da imagem vindos do banco de dados
+                InputStream input = rs.getBinaryStream("foto");
+            
+                if (input != null) {
+                    // 2. Transforma os bytes em um objeto BufferedImage do Java
+                    Image imagemOriginal = ImageIO.read(input);
+                
+                    // 3. Redimensiona a imagem (opcional, como fizemos antes)
+                    Image imagemRedimensionada = imagemOriginal.getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+                
+                    // 4. Retorna o ImageIcon pronto para o JLabel
+                    return new ImageIcon(imagemRedimensionada);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null; // Retorna null se não encontrar ou der erro
+    }
+
 
 }

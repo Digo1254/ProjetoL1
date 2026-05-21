@@ -1,5 +1,6 @@
 package com.projeto;
 
+import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
 import java.sql.Connection;
 import java.util.List;
@@ -7,7 +8,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.SynchronousQueue;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.WebcamPanel;
@@ -30,16 +33,20 @@ public class App
 {
     public static void main( String[] args )
     {
-        // Busca Pedido(Utilizado muito provavelmente pelo caixa)
-        String codigo = String.valueOf(leituraQrCode());
+
 
         
 
-        Connection conexao = ConexaoBanco.conectar();
+        // Busca Pedido(Utilizado muito provavelmente pelo caixa)
+        // String codigo = String.valueOf(leituraQrCode());
 
-        PedidoDAO pedidoDAO = new PedidoDAO();
+        // System.out.println("Codigo:" + codigo);
 
-        int idComanda = pedidoDAO.buscaCodigoQR(codigo, conexao);
+        // Connection conexao = ConexaoBanco.conectar();
+
+        // PedidoDAO pedidoDAO = new PedidoDAO();
+
+        // int idComanda = pedidoDAO.buscaCodigoQR(codigo, conexao);
 
         // List<Pedido> pedidosBusca = pedidoDAO.busca(conexao, codigo);
 
@@ -56,23 +63,23 @@ public class App
         // }
         
         // Inserir pedido no banco de dados
-        Pedido pedido = new Pedido();
+        // Pedido pedido = new Pedido();
 
-        pedido.setIdComanda(idComanda);
-        pedido.setStatus(Status.PREPARANDO);
-        pedido.setValorTotal(192.4);
+        // pedido.setIdComanda(idComanda);
+        // pedido.setStatus(Status.PREPARANDO);
+        // pedido.setValorTotal(192.4);
 
-        Map<Item,Integer> mapa = pedido.getMapa();
+        // Map<Item,Integer> mapa = pedido.getMapa();
 
-        Item item = new Item();
+        // Item item = new Item();
 
-        item.setId(1);
+        // item.setId(1);
 
-        mapa.put(item,4);
+        // mapa.put(item,4);
 
-        pedido.setMapa(mapa);
+        // pedido.setMapa(mapa);
 
-        pedidoDAO.inserir(pedido, conexao);
+        // pedidoDAO.inserir(pedido, conexao);
         
 
         // ------------------------------------------------------
