@@ -2,7 +2,9 @@ package com.projeto;
 
 import java.awt.image.BufferedImage;
 import java.sql.Connection;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.SynchronousQueue;
 
 import javax.swing.JFrame;
@@ -28,29 +30,47 @@ public class App
 {
     public static void main( String[] args )
     {
+
+        String codigo = String.valueOf(leituraQrCode());
+
         Connection conexao = ConexaoBanco.conectar();
 
         PedidoDAO pedidoDAO = new PedidoDAO();
 
-        Pedido pedido = new Pedido();
+        List<Pedido> pedidosBusca = pedidoDAO.busca(conexao, codigo);
 
-        pedido.setIdComanda(1);
-        pedido.setStatus(Status.PREPARANDO);
-        pedido.setValorTotal(192.4);
+        if(pedidosBusca.isEmpty()){
+            System.out.println("Está vazio");
+        }
+        else{
+            for(Pedido pedido : pedidosBusca){
+            Set<Item> set = pedido.getMapa().keySet();
+            for(Item item : set){
+                System.out.println("Produto: " + item.getNome() + " Quantidade: " + pedido.getMapa().get(item));
+            }
+            }
+        }
+        
 
-        Map<Item,Integer> mapa = pedido.getMapa();
+        // Pedido pedido = new Pedido();
 
-        Item item = new Item();
+        // pedido.setIdComanda(1);
+        // pedido.setStatus(Status.PREPARANDO);
+        // pedido.setValorTotal(192.4);
 
-        item.setId(1);
+        // Map<Item,Integer> mapa = pedido.getMapa();
 
-        pedido.setId(4);
+        // Item item = new Item();
 
-        mapa.put(item,2);
+        // item.setId(1);
 
-        pedido.setMapa(mapa);
+        // pedido.setId(4);
 
-        pedidoDAO.inserir(pedido, conexao);
+        // mapa.put(item,2);
+
+        // pedido.setMapa(mapa);
+
+        // pedidoDAO.inserir(pedido, conexao);
         
         // System.out.println("Tentando conectar ao MySQL...");
         

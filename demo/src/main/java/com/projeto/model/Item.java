@@ -6,7 +6,7 @@ public class Item {
 
     private String nome;
 
-    private float valor;
+    private double valor;
 
     private String descricao;
 
@@ -28,11 +28,11 @@ public class Item {
         this.nome = nome;
     }
 
-    public float getValor() {
+    public double getValor() {
         return valor;
     }
 
-    public void setValor(float valor) {
+    public void setValor(double valor) {
         this.valor = valor;
     }
 
