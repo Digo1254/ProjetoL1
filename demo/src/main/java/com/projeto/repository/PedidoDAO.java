@@ -30,7 +30,6 @@ public class PedidoDAO {
     String sqlInsertPedidos = "INSERT INTO pedidos (valorTotal, status, fk_comanda) VALUES (?, ?, ?)";
     String sqlInsertItens = "INSERT INTO itens_do_pedido (pedido_id, item_id, quantidade) VALUES (?, ?, ?)";
 
-    // Criamos os dois statements juntos para gerenciar a mesma transação
     try (PreparedStatement stm = conexao.prepareStatement(sqlInsertPedidos, Statement.RETURN_GENERATED_KEYS);
          PreparedStatement stm2 = conexao.prepareStatement(sqlInsertItens)) {
 
@@ -180,37 +179,49 @@ public class PedidoDAO {
 
     }
 
-// Exemplo puxa imagem banco de dados
+    public void deletar(Connection conexao, int id) {
+    String sqlDeletarPedido = "DELETE FROM pedidos WHERE id = ?";
 
-    public ImageIcon buscarImagemDoBanco(int idProduto,Connection conexao) {
-        String sql = "SELECT foto FROM produtos WHERE id = ?";
-    
-        // ConexaoBanco é a classe que você já tem no seu projeto (visto na imagem anterior)
-        try (PreparedStatement stmt = conexao.prepareStatement(sql)) {
-        
-            stmt.setInt(1, idProduto);
-            ResultSet rs = stmt.executeQuery();
-        
-            if (rs.next()) {
-                // 1. Pega os bytes da imagem vindos do banco de dados
-                InputStream input = rs.getBinaryStream("foto");
-            
-                if (input != null) {
-                    // 2. Transforma os bytes em um objeto BufferedImage do Java
-                    Image imagemOriginal = ImageIO.read(input);
-                
-                    // 3. Redimensiona a imagem (opcional, como fizemos antes)
-                    Image imagemRedimensionada = imagemOriginal.getScaledInstance(200, 200, Image.SCALE_SMOOTH);
-                
-                    // 4. Retorna o ImageIcon pronto para o JLabel
-                    return new ImageIcon(imagemRedimensionada);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null; // Retorna null se não encontrar ou der erro
+    try (PreparedStatement stm = conexao.prepareStatement(sqlDeletarPedido)) {
+        stm.setInt(1, id);
+        stm.executeUpdate();
+
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+}
+
+//
+
+//     public ImageIcon buscarImagemDoBanco(int idProduto,Connection conexao) {
+//         String sql = "SELECT foto FROM produtos WHERE id = ?";
+    
+//         
+//         try (PreparedStatement stmt = conexao.prepareStatement(sql)) {
+        
+//             stmt.setInt(1, idProduto);
+//             ResultSet rs = stmt.executeQuery();
+        
+//             if (rs.next()) {
+//                 
+//                 InputStream input = rs.getBinaryStream("foto");
+            
+//                 if (input != null) {
+//                     
+//                     Image imagemOriginal = ImageIO.read(input);
+                
+//                     
+//                     Image imagemRedimensionada = imagemOriginal.getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+                
+//                     
+//                     return new ImageIcon(imagemRedimensionada);
+//                 }
+//             }
+//         } catch (Exception e) {
+//             e.printStackTrace();
+//         }
+//         return null;
+//     }
 
 
 }
