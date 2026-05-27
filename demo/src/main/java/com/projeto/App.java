@@ -38,9 +38,9 @@ public class App
         
 
         // Busca Pedido(Utilizado muito provavelmente pelo caixa)
-        // String codigo = String.valueOf(leituraQrCode());
+        String codigo = String.valueOf(leituraQrCode());
 
-        // System.out.println("Codigo:" + codigo);
+        System.out.println("Codigo:" + codigo);
 
         // Connection conexao = ConexaoBanco.conectar();
 
