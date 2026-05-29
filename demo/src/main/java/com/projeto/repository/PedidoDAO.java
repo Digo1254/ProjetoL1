@@ -180,7 +180,7 @@ public class PedidoDAO {
     }
 
     public void deletar(Connection conexao, int id) {
-    String sqlDeletarPedido = "DELETE FROM pedidos WHERE id = ?";
+    String sqlDeletarPedido = "DELETE FROM pedidos WHERE idPedidos = ?";
 
     try (PreparedStatement stm = conexao.prepareStatement(sqlDeletarPedido)) {
         stm.setInt(1, id);
@@ -190,6 +190,43 @@ public class PedidoDAO {
         e.printStackTrace();
     }
 }
+
+    public void cancelar(Connection conexao, int id) {
+    String sql = "UPDATE pedidos SET status = 'CANCELADO' WHERE idPedidos = ?";
+
+    try (PreparedStatement stm = conexao.prepareStatement(sql)) {
+        stm.setInt(1, id);
+        stm.executeUpdate();
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+
+    public void deletarPorComanda(Connection conexao, int idComanda) {
+        try {
+            conexao.setAutoCommit(false);
+
+            String sqlItens = "DELETE FROM itens_do_pedido WHERE pedido_id IN (SELECT idPedidos FROM pedidos WHERE fk_comanda = ?)";
+            try (PreparedStatement stm = conexao.prepareStatement(sqlItens)) {
+                stm.setInt(1, idComanda);
+                stm.executeUpdate();
+            }
+
+            String sqlPedidos = "DELETE FROM pedidos WHERE fk_comanda = ?";
+            try (PreparedStatement stm = conexao.prepareStatement(sqlPedidos)) {
+                stm.setInt(1, idComanda);
+                stm.executeUpdate();
+            }
+
+            conexao.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            try { conexao.rollback(); } catch (Exception ex) { ex.printStackTrace(); }
+        } finally {
+            try { conexao.setAutoCommit(true); } catch (Exception e) { e.printStackTrace(); }
+        }
+    }
 
 //
 
